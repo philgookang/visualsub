@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title></title>
+
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <style>
+            @charset "utf-8"; *{margin:0;padding:0;}
+            html, body {margin: 0px; padding: 0px; border: 0px; width: 100%; height: 100%; -webkit-font-smoothing: antialiased; background-color: #fff; }
+        </style>
+
+        <script src="/js/helper_function.js"></script>
+    </head>
+    <body>
+        <div id="canvas"></div>
+    </body>
+    <script>
+        var Visualsub = (function() {
+            var that = { svg : null, idx : 0 };
+            that.init = function() {
+                var w = window.innerWidth;
+                var h = window.innerHeight;
+                that.svg = d3.select("#canvas").append('svg').attr('width', w).attr('height', h);
+            };
+            that.getCanvasLocation = function(station) {
+                return mapPosition(station.x, station.y, station.radius)
+            };
+            that.moveTo = function(element, station, position) {
+                position = mapPosition(position.x, position.y, station.radius);
+                element.transition().duration(800).attr("transform", transformStation(position));
+            };
+            that.addStation = function(station_list) {
+
+                for (var i = 0; i < station_list.length; i++) {
+
+                    // 추가 할역을 가져오기
+                    var new_station = station_list[i];
+
+                    // group을 추가
+                    var group = that.svg.append("g").data([new_station]);
+
+                    // group에대한 변수 추가
+                    group.attr("idx", new_station.idx)
+                        .style("cursor", "pointer");
+
+                    // 원형 추가
+                    group.append("circle").data([new_station])
+                        .attr("r", station => station.radius)
+                        .attr("cx", 0)
+                        .attr("cy", 0)
+                        .style("fill", station => "#dfdfdf");
+
+                    // 역 문구 추가
+                    group.append("text").data([new_station])
+                        .style("font-size", "12px")
+                        .style("fill", "#000")
+                        .attr("x", station => stationNameCentering(station))
+                        .attr("y", station => stationNameVerticalAlign(station))
+                        .text(station => station.name);
+
+                    // 위치로 이동
+                    group.attr("transform", function(station, i) {
+                        return transformStation(that.getCanvasLocation(station));
+                    });
+
+                    // event 추가
+                    group.on('click', function(click_station) {
+
+                        // 중앙놈 움직이고
+                        Visualsub.moveTo(d3.select(this), click_station, {x:0, y:0});
+
+                        // 중앙놈 기준으로 나머지 움직이면 됨
+                        that.svg.selectAll("g").each(function(other_station){
+
+                            // 중앙놈이면 skip~!
+                            if (other_station.idx == click_station.idx) return;
+
+                            // tan(angle) = opposite/adjacent
+                            // angle = arctan(opposite/adjacent)
+                            var adjacent    = click_station.x + other_station.x;
+                            var opposite    = click_station.y + other_station.y;
+                            var angle       = Math.atan(opposite/adjacent);
+                            var quadAglOff  = quadrantAdditionalAngle(click_station, other_station);
+                            var radius      = stationDistance(click_station, other_station);
+
+                            // polor coordinate --> cartesian coordinates
+                            var x = (radius * Math.cos( (angle + quadAglOff) ))
+                            var y = (radius * Math.sin( (angle + quadAglOff) ))
+
+                            // 역을 움직히자!
+                            Visualsub.moveTo(d3.select(this), other_station, {"x": x, "y": y});
+                        });
+                    });
+                }
+                // end for loop
+            };
+            return that;
+        })();
+
+        (function() {
+
+
+            var centerStation = createStation("강남역", 2, 0, 0, 0);
+
+            var station_list = [];
+            station_list.push(centerStation);
+
+            station_list.push(createStation("건대입구"  , 2, 4, 6, 2));
+            station_list.push(createStation("구의"      , 2, 4, 5, 2));
+            station_list.push(createStation("강변"      , 2, 4, 4, 2));
+            station_list.push(createStation("잘실나루"  , 2, 4, 3, 2));
+            station_list.push(createStation("잠실"      , 2, 4, 2, 2));
+            station_list.push(createStation("잘실새내"  , 2, 4, 1, 2));
+            station_list.push(createStation("종합운동장", 2, 4, 0, 2));
+            station_list.push(createStation("삼성"     , 2, 3, 0, 2));
+            station_list.push(createStation("선릉"     , 2, 2, 0, 2));
+            station_list.push(createStation("역삼"     , 2, 1, 0, 4));
+
+            station_list.push(createStation("금호"    , 2, -1, 6, 25));
+            station_list.push(createStation("옥수"    , 2, -1, 5, 22));
+            station_list.push(createStation("압구정"  , 2, -1, 4, 17));
+            station_list.push(createStation("신사"    , 2, -1, 3, 16));
+            station_list.push(createStation("잠원"    , 2, -1, 2, 12));
+            station_list.push(createStation("양재역"   , 2, 0, -2, 6));
+
+            station_list.push(createStation("고속터미널역"  , 2, -1, 1, 6));
+            station_list.push(createStation("교대역"       , 2, -1, 0, 4));
+            station_list.push(createStation("남부터미널역"  , 2, -1, -1, 12));
+
+
+            station_list.push(createStation("서초역"       , 2, -2, 0, 14));
+            station_list.push(createStation("방배역"       , 2, -3, 0, 12));
+            station_list.push(createStation("사당역"       , 2, -4, 0, 5));
+            station_list.push(createStation("낙성대역"     , 2, -5, 0, 2));
+            station_list.push(createStation("서울대입구역" , 2, -6, 0, 7));
+            station_list.push(createStation("봉천"        , 2, -7, 0, 7));
+            station_list.push(createStation("신림"        , 2, -8, 0, 9));
+            station_list.push(createStation("신대방"       , 2, -9, 0, 11));
+            station_list.push(createStation("구로디지"     , 2, -10, 0, 19));
+            station_list.push(createStation("대림"        , 2, -11, 0, 22));
+            station_list.push(createStation("신도림"      , 2, -12, 0, 25));
+
+            Visualsub.init();
+            Visualsub.addStation(station_list)
+        })();
+    </script>
+</html>
