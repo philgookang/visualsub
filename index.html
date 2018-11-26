@@ -18,18 +18,31 @@
         <script src="/js/helper/math.js"></script>
         <script src="/js/helper/station.js"></script>
     </head>
+    <!--style="background-image: url('a.png'); background-repeat: no-repeat; background-position: center;"-->
     <body>
         <div id="canvas"></div>
+        <button style="position:fixed; top: 10px; left: 10px;" onclick="onclick_scale_up()">Scale +</button>
+        <button style="position:fixed; top: 30px; left: 10px;" onclick="onclick_scale_down()">Scale -</button>
     </body>
     <script>
+        var onclick_scale_up = function() {
+            Visualsub.scale -= 0.1;
+            Visualsub.rerender();
+        };
+        var onclick_scale_down = function() {
+            Visualsub.scale += 0.1;
+            Visualsub.rerender();
+        };
         var Visualsub = (function() {
-            var that = { svg : null, idx : 0, tcnt : 0 };
+            var that = { svg : null, svg_station : null, svg_line : null, idx : 0, scale : 0.9 };
             that.init = function() {
                 // var w = window.innerWidth;
                 // var h = window.innerHeight;
                 var w = 1700;
                 var h = 800;
                 that.svg = d3.select("#canvas").append('svg').attr('width', w).attr('height', h);
+                that.svg_station = that.svg.append("g").attr("name", "stations")
+                that.svg_line = that.svg.append("g").attr("name", "lines")
             };
             that.getCanvasLocation = function(station) {
                 return mapPosition(station.x, station.y, station.radius)
@@ -37,6 +50,13 @@
             that.moveTo = function(element, station, position, delay_time) {
                 position = mapPosition(position.x, position.y, station.radius);
                 element.transition().delay(( 100 * delay_time)).duration(800).attr("transform", transformStation(position));
+            };
+            that.rerender = function() {
+                that.svg_station.selectAll("g").each(function(station) {
+                    d3.select(this).attr("transform", function(station, i) {
+                        return transformStation(that.getCanvasLocation(station));
+                    });
+                });
             };
             that.addStation = function(station_list) {
 
@@ -46,7 +66,7 @@
                     var new_station = station_list[i];
 
                     // group을 추가
-                    var group = that.svg.append("g").data([new_station]);
+                    var group = that.svg_station.append("g").data([new_station]);
 
                     // group에대한 변수 추가
                     group.attr("idx", new_station.idx)
@@ -54,23 +74,18 @@
 
                     // 원형 추가
                     group.append("circle").data([new_station])
-                        .attr("r", station => station.radius)
+                        .attr("r", station => (station.radius * Visualsub.scale))
                         .attr("cx", 0)
                         .attr("cy", 0)
-                        .style("fill", station => "#000099");
+                        .style("fill", station => station.color);
 
                     // 역 문구 추가
                     group.append("text").data([new_station])
-                        .style("font-size", "12px")
+                        .style("font-size", (12 * Visualsub.scale)  + "px")
                         .style("fill", "#000")
                         .attr("x", station => stationNameCentering(station))
                         .attr("y", station => stationNameVerticalAlign(station))
                         .text(station => station.name);
-
-                    // 위치로 이동
-                    group.attr("transform", function(station, i) {
-                        return transformStation(that.getCanvasLocation(station));
-                    });
 
                     // event 추가
                     group.on('click', function(click_station) {
@@ -79,7 +94,7 @@
                         Visualsub.moveTo(d3.select(this), click_station, {x:0, y:0}, 0);
 
                         // 중앙놈 기준으로 나머지 움직이면 됨
-                        that.svg.selectAll("g").each(function(other_station, i){
+                        that.svg_station.selectAll("g").each(function(other_station, i) {
 
                             // 중앙놈이면 skip~!
                             if (other_station.idx == click_station.idx) return;
@@ -102,13 +117,14 @@
                     });
                 }
                 // end for loop
+
+                // 위추로 이동
+                Visualsub.rerender();
             };
             return that;
         })();
 
         (function() {
-
-            var centerStation = createStation("강남역", 2, 0, 0, 0);
 
             var station_list = [];
 

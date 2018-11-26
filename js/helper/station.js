@@ -7,14 +7,26 @@ var createStation = function(name, line_number, x, y, time) {
 
 var createStationNew = function(station) {
     Visualsub.idx += 1;
-    return { "idx" : Visualsub.idx, "name" : station.name, "line_number" : "", "x" : station.x, "y" : station.y, "radius" : 4, "time" : "" };
+    var color = "";
+    if (station.line == "2") {
+        color = "#3cb44a";
+    } else if (station.line == "경의중앙선") {
+        color = "#5ba37f";
+    } else if (station.line == "분당선") {
+        color = "#ffce33";
+    } else if (station.line == "3") {
+        color = "#ff7300";
+    } else if (station.line == "4") {
+        color = "#2c9ede";
+    }
+    return { "idx" : Visualsub.idx, "name" : station.name, "color" : color, "x" : station.x, "y" : station.y, "radius" : 4, "time" : "" };
 };
 
 var stationNameCentering = function(station) {
-    return -(station.name.length * 6);
+    return -(station.name.length * 6) * Visualsub.scale;
 }
 var stationNameVerticalAlign = function(station) {
-    return ((station.radius * 2) + 6);
+    return ((station.radius * 2) + 10) * Visualsub.scale;
 }
 
 var transformStation = function(t) {
@@ -33,8 +45,8 @@ var mapPosition = function(x, y, radius) {
     var fixedDistance = 5;
 
     return {
-        "x" : (winWidthHalf + (fixedDistance * x)) - radius,
-        "y" : (winheightHalf + ((fixedDistance * y) * -1)) - radius
+        "x" : (winWidthHalf + ((fixedDistance * x) * Visualsub.scale)) - (radius * Visualsub.scale),
+        "y" : (winheightHalf + (((fixedDistance * y) * Visualsub.scale) * -1)) - (radius * Visualsub.scale)
     };
 };
 
