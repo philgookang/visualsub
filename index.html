@@ -14,7 +14,11 @@
             html, body {margin: 0px; padding: 0px; border: 0px; width: 100%; height: 100%; -webkit-font-smoothing: antialiased; background-color: #fff; }
         </style>
 
-        <script src="/js/data.js"></script>
+        <script src="/js/data/line2.js"></script>
+        <script src="/js/data/line3.js"></script>
+        <script src="/js/data/line4.js"></script>
+        <script src="/js/data/linebundang.js"></script>
+        <script src="/js/data/linejunang.js"></script>
         <script src="/js/helper/math.js"></script>
         <script src="/js/helper/station.js"></script>
     </head>
@@ -90,6 +94,9 @@
                     // event 추가
                     group.on('click', function(click_station) {
 
+                        // 선 모두 숨기기
+                        Visualsub.svg_line.selectAll("path").remove();
+
                         // 중앙놈 움직이고
                         Visualsub.moveTo(d3.select(this), click_station, {x:0, y:0}, 0);
 
@@ -112,7 +119,7 @@
                             var y = (radius * Math.sin( Math.radians(adjustAngle) ))
 
                             // 역을 움직히자!
-                            Visualsub.moveTo(d3.select(this), other_station, {"x": x, "y": y}, (i + 1));
+                            Visualsub.moveTo(d3.select(this), other_station, {"x": x, "y": y}, 1);
                         });
                     });
                 }
@@ -121,20 +128,61 @@
                 // 위추로 이동
                 Visualsub.rerender();
             };
+            that.drawPath = function(pathway, color) {
+                var line = d3.line().x( d => d.x ).y(d => d.y).curve(d3.curveCardinal);
+                that.svg_line.append('path')
+                        .attr("stroke", color)
+                        .attr("stroke-width", 3)
+                        .attr("fill", "none")
+                        .attr("d", line(pathway));
+            };
             return that;
         })();
 
         (function() {
+            var subway_list = [];
+            subway_list = subway_list.concat(data_line2);
+            subway_list = subway_list.concat(data_line3);
+            subway_list = subway_list.concat(data_line4);
+            subway_list = subway_list.concat(data_linebundang);
+            subway_list = subway_list.concat(data_linejunang);
 
             var station_list = [];
+            var green_line = [];
+            var orange_line = [];
+            var skyblue_line = [];
+            var bundang_line = [];
+            var junang_line = [];
 
             for (var i = 0 ; i < subway_list.length; i++) {
                 var subway = subway_list[i];
                 station_list.push(createStation(subway));
+
+                if (subway.line == "2") {
+                    green_line.push(mapPosition(subway.x, subway.y, Visualsub.radius));
+                } else if (subway.line == "3") {
+                    orange_line.push(mapPosition(subway.x, subway.y, Visualsub.radius));
+                } else if (subway.line == "4") {
+                    skyblue_line.push(mapPosition(subway.x, subway.y, Visualsub.radius));
+                } else if (subway.line == "분당선") {
+                    bundang_line.push(mapPosition(subway.x, subway.y, Visualsub.radius));
+                } else if (subway.line == "경의중앙선") {
+                    junang_line.push(mapPosition(subway.x, subway.y, Visualsub.radius));
+                }
             }
+
+            // 2호선만 circle 닫여야해서
+            // 시작점을 끝점으로 만든다
+            green_line.push(green_line[0]);
 
             Visualsub.init();
             Visualsub.addStation(station_list);
+
+            Visualsub.drawPath(junang_line, "#5ba37f");
+            Visualsub.drawPath(bundang_line, "#ffce33");
+            Visualsub.drawPath(skyblue_line, "#2c9ede");
+            Visualsub.drawPath(orange_line, "#ff7300");
+            Visualsub.drawPath(green_line, "#3cb44a");
         })();
     </script>
 </html>
