@@ -1,20 +1,25 @@
 
 var createStation = function(station) {
     Visualsub.idx += 1;
-    var color = "";
-    if (station.line == "2") {
-        color = "#3cb44a";
-    } else if (station.line == "경의중앙선") {
-        color = "#5ba37f";
-    } else if (station.line == "분당선") {
-        color = "#ffce33";
-    } else if (station.line == "3") {
-        color = "#ff7300";
-    } else if (station.line == "4") {
-        color = "#2c9ede";
-    }
+    var color = stationColor(station.line);
     return { "idx" : Visualsub.idx, "name" : station.name, "color" : color, "x" : station.x, "y" : station.y, "radius" : Visualsub.radius, "time" : "" };
 };
+
+var stationColor = function(line) {
+    var color = "";
+    if (line == "2") {
+        color = "#3cb44a";
+    } else if (line == "3") {
+        color = "#ff7300";
+    } else if (line == "4") {
+        color = "#2c9ede";
+    } else if (line == "junang") {
+        color = "#5ba37f";
+    } else if (line == "bundang") {
+        color = "#ffce33";
+    }
+    return color;
+}
 
 var stationNameCentering = function(station) {
     return -(station.name.length * 6) * Visualsub.scale;
