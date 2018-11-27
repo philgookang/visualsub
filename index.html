@@ -34,7 +34,7 @@
             Visualsub.rerender();
         };
         var Visualsub = (function() {
-            var that = { svg : null, svg_station : null, svg_line : null, idx : 0, scale : 0.9 };
+            var that = { svg : null, svg_station : null, svg_line : null, idx : 0, scale : 0.9, radius : 4 };
             that.init = function() {
                 // var w = window.innerWidth;
                 // var h = window.innerHeight;
@@ -45,7 +45,7 @@
                 that.svg_line = that.svg.append("g").attr("name", "lines")
             };
             that.getCanvasLocation = function(station) {
-                return mapPosition(station.x, station.y, station.radius)
+                return mapPosition(station.x, station.y, station.radius);
             };
             that.moveTo = function(element, station, position, delay_time) {
                 position = mapPosition(position.x, position.y, station.radius);
@@ -130,11 +130,11 @@
 
             for (var i = 0 ; i < subway_list.length; i++) {
                 var subway = subway_list[i];
-                station_list.push(createStationNew(subway));
+                station_list.push(createStation(subway));
             }
 
             Visualsub.init();
-            Visualsub.addStation(station_list)
+            Visualsub.addStation(station_list);
         })();
     </script>
 </html>
