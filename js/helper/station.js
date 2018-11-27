@@ -13,7 +13,7 @@ var createStationNew = function(station) {
     } else if (station.line == "4") {
         color = "#2c9ede";
     }
-    return { "idx" : Visualsub.idx, "name" : station.name, "color" : color, "x" : station.x, "y" : station.y, "radius" : 4, "time" : "" };
+    return { "idx" : Visualsub.idx, "name" : station.name, "color" : color, "x" : station.x, "y" : station.y, "radius" : Visualsub.radius, "time" : "" };
 };
 
 var stationNameCentering = function(station) {
