@@ -1,10 +1,4 @@
 
-
-var createStation = function(name, line_number, x, y, time) {
-    Visualsub.idx += 1;
-    return { "idx" : Visualsub.idx, "name" : name, "line_number" : line_number, "x" : x, "y" : y, "radius" : 6, "time" : time };
-};
-
 var createStationNew = function(station) {
     Visualsub.idx += 1;
     var color = "";
