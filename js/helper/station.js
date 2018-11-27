@@ -1,5 +1,5 @@
 
-var createStationNew = function(station) {
+var createStation = function(station) {
     Visualsub.idx += 1;
     var color = "";
     if (station.line == "2") {
